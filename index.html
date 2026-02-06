@@ -113,6 +113,21 @@
       <div id="lista-informe" style="margin-top: 15px"></div>
     </div>
 
+    <div class="card" style="border-top: 4px solid #dc3545">
+      <h3>⚠️ Correcciones</h3>
+      <button
+        id="btn-eliminar"
+        onclick="eliminarUltimo()"
+        style="background: #dc3545"
+      >
+        <span id="btn-text-eliminar">Eliminar Último Gasto</span>
+        <div id="loader-eliminar" class="spinner" style="display: none"></div>
+      </button>
+      <p style="font-size: 0.8rem; color: #666; margin-top: 10px">
+        *Esto borrará la última fila registrada en tu Google Sheet.
+      </p>
+    </div>
+
     <script>
       const SCRIPT_URL =
         'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
@@ -161,7 +176,7 @@
         btnText.innerText = 'Enviando...'
         loader.style.display = 'inline-block'
 
-        const data = { monto, categoria, descripcion: desc }
+        const data = { monto, categoria, descripcion: desc, action: 'save' }
 
         try {
           await fetch(SCRIPT_URL, {
@@ -233,6 +248,45 @@
           btnText.innerText = 'Actualizar Informe'
           loader.style.display = 'none'
           contenedor.style.opacity = '1'
+        }
+      }
+
+      async function eliminarUltimo() {
+        // 1. Confirmación de seguridad
+        if (
+          !confirm('¿Estás seguro de que quieres borrar el último registro?')
+        ) {
+          return
+        }
+
+        const btn = document.getElementById('btn-eliminar')
+        const btnText = document.getElementById('btn-text-eliminar')
+        const loader = document.getElementById('loader-eliminar')
+
+        btn.disabled = true
+        btnText.innerText = 'Borrando...'
+        loader.style.display = 'inline-block'
+
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({ action: 'deleteLast' }),
+          })
+
+          alert('Último gasto eliminado.')
+
+          // Opcional: Actualizar el informe automáticamente si ya estaba visible
+          if (document.getElementById('lista-informe').innerHTML !== '') {
+            cargarInforme()
+          }
+        } catch (error) {
+          console.error(error)
+          alert('No se pudo eliminar el gasto.')
+        } finally {
+          btn.disabled = false
+          btnText.innerText = 'Eliminar Último Gasto'
+          loader.style.display = 'none'
         }
       }
 
