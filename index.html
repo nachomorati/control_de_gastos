@@ -117,51 +117,49 @@
         })
 
       async function enviarASheet() {
-        async function enviarASheet() {
-          const btn = document.getElementById('btn-guardar')
-          const btnText = document.getElementById('btn-text')
-          const loader = document.getElementById('loader')
+        const btn = document.getElementById('btn-guardar')
+        const btnText = document.getElementById('btn-text')
+        const loader = document.getElementById('loader')
 
-          // 1. Obtener datos
-          const monto = document.getElementById('monto').value
-          const categoria = document.getElementById('categoria').value
-          const desc = document.getElementById('desc').value
+        // 1. Obtener datos
+        const monto = document.getElementById('monto').value
+        const categoria = document.getElementById('categoria').value
+        const desc = document.getElementById('desc').value
 
-          if (!monto) {
-            alert('Por favor ingresa un monto')
-            return
-          }
+        if (!monto) {
+          alert('Por favor ingresa un monto')
+          return
+        }
 
-          // 2. Bloquear botón y mostrar spinner
-          btn.disabled = true
-          btnText.innerText = 'Enviando...'
-          loader.style.display = 'inline-block'
+        // 2. Bloquear botón y mostrar spinner
+        btn.disabled = true
+        btnText.innerText = 'Enviando...'
+        loader.style.display = 'inline-block'
 
-          const data = { monto, categoria, descripcion: desc }
+        const data = { monto, categoria, descripcion: desc }
 
-          try {
-            await fetch(SCRIPT_URL, {
-              method: 'POST',
-              mode: 'no-cors', // Google Apps Script requiere no-cors o redirecciones
-              body: JSON.stringify(data),
-            })
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Google Apps Script requiere no-cors o redirecciones
+            body: JSON.stringify(data),
+          })
 
-            // 3. Éxito
-            alert('¡Gasto guardado correctamente!')
-            document.getElementById('monto').value = ''
-            document.getElementById('desc').value = ''
-          } catch (error) {
-            console.error(error)
-            alert('Hubo un error al guardar.')
-          } finally {
-            // 4. Resetear botón pase lo que pase
-            btn.disabled = false
-            btnText.innerText = 'Guardar en Sheet'
-            loader.style.display = 'none'
-          }
+          // 3. Éxito
+          alert('¡Gasto guardado correctamente!')
+          document.getElementById('monto').value = ''
+          document.getElementById('desc').value = ''
+        } catch (error) {
+          console.error(error)
+          alert('Hubo un error al guardar.')
+        } finally {
+          // 4. Resetear botón pase lo que pase
+          btn.disabled = false
+          btnText.innerText = 'Guardar en Sheet'
+          loader.style.display = 'none'
         }
       }
-      
+
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
       }
