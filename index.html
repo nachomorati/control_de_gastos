@@ -156,18 +156,23 @@
 
       async function cargarCategorias() {
         const selectEl = document.querySelector('#categoria')
-        const response = await fetch(`${SCRIPT_URL}?tipo=categorias`)
-        if (!response.ok) {
-          throw new Error('Error en la respuesta cargando las categorias.')
+        selectEl.innerHTML = '<option>Cargando categorias...</option>'
+
+        try {
+          const response = await fetch(`${SCRIPT_URL}?tipo=categorias`)
+          if (!response.ok) {
+            throw new Error('Error en la respuesta cargando las categorias.')
+          }
+
+          const datos = await response.json()
+          const options = datos
+            .map((cat) => `<option value="${cat}">${cat}</option>`)
+            .join('')
+          selectEl.innerHTML = `<option value="" disabled selected>Selecciona una categoria</option>${options}`
+        } catch (error) {
+          selectEl.innerHTML =
+            '<option>Error al cargar las categorias 😢</option>'
         }
-
-        const datos = await response.json()
-
-        let selectHTML = ''
-        datos.forEach((element) => {
-          selectHTML += `<option>${element}</option>`
-        })
-        selectEl.innerHTML = selectHTML
       }
 
       async function enviarASheet() {
