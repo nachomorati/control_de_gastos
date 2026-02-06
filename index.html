@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GastoFlash PWA</title>
+    <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #f4f4f9;
+      }
+      .card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0;
+        box-sizing: border-box;
+      }
+      button {
+        background: #28a745;
+        color: white;
+        border: none;
+        font-weight: bold;
+      }
+      #preview {
+        width: 100%;
+        display: none;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>💸 Mis Gastos</h2>
+
+    <div class="card">
+      <h3>Registrar Gasto</h3>
+      <input type="number" id="monto" placeholder="Monto $" />
+      <select id="categoria">
+        <option value="Comida">Comida</option>
+        <option value="Transporte">Transporte</option>
+        <option value="Ocio">Ocio</option>
+      </select>
+      <input type="text" id="desc" placeholder="Descripción" />
+      <button onclick="enviarASheet()">Guardar en Sheet</button>
+    </div>
+
+    <div class="card">
+      <h3>Escanear Ticket</h3>
+      <input type="file" accept="image/*" capture="camera" id="ticket-upload" />
+      <p id="status">Esperando ticket...</p>
+    </div>
+
+    <script>
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
+
+      // Lógica de Escaneo
+      document
+        .getElementById('ticket-upload')
+        .addEventListener('change', function (e) {
+          const file = e.target.files[0]
+          document.getElementById('status').innerText =
+            'Analizando ticket... ⏳'
+
+          Tesseract.recognize(file, 'spa').then(({ data: { text } }) => {
+            console.log(text)
+            // Lógica simple: buscar el primer número grande que parezca un total
+            const montos = text.match(/\d+[\.,]\d{2}/g)
+            if (montos) {
+              document.getElementById('monto').value = montos[
+                montos.length - 1
+              ].replace(',', '.')
+              document.getElementById('status').innerText = '¡Monto detectado!'
+            } else {
+              document.getElementById('status').innerText =
+                'No se halló el total, ingresalo manual.'
+            }
+          })
+        })
+
+      async function enviarASheet() {
+        const data = {
+          monto: document.getElementById('monto').value,
+          categoria: document.getElementById('categoria').value,
+          descripcion: document.getElementById('desc').value,
+        }
+
+        await fetch(SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: JSON.stringify(data),
+        })
+        alert('¡Gasto guardado!')
+        document.getElementById('monto').value = ''
+      }
+    </script>
+  </body>
+</html>
