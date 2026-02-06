@@ -80,13 +80,7 @@
     <div class="card">
       <h3>Registrar Gasto</h3>
       <input type="number" id="monto" placeholder="Monto $" />
-      <select id="categoria">
-        <option value="Despensa">Despensa</option>
-        <option value="Transporte">Transporte</option>
-        <option value="Salud">Salud</option>
-        <option value="Regalos">Regalos</option>
-        <option value="Ocio">Ocio</option>
-      </select>
+      <select id="categoria"></select>
       <input type="text" id="desc" placeholder="Descripción" />
       <button id="btn-guardar" onclick="enviarASheet()">
         <span id="btn-text">Guardar en Sheet</span>
@@ -132,6 +126,10 @@
       const SCRIPT_URL =
         'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
 
+      window.onload = () => {
+        cargarCategorias()
+      }
+
       // Lógica de Escaneo
       document
         .getElementById('ticket-upload')
@@ -155,6 +153,22 @@
             }
           })
         })
+
+      async function cargarCategorias() {
+        const selectEl = document.querySelector('#categoria')
+        const response = await fetch(`${SCRIPT_URL}?tipo=categorias`)
+        if (!response.ok) {
+          throw new Error('Error en la respuesta cargando las categorias.')
+        }
+
+        const datos = await response.json()
+
+        let selectHTML = ''
+        datos.forEach((element) => {
+          selectHTML += `<option>${element}</option>`
+        })
+        selectEl.innerHTML = selectHTML
+      }
 
       async function enviarASheet() {
         const btn = document.getElementById('btn-guardar')
@@ -213,7 +227,7 @@
         contenedor.style.opacity = '0.5' // Efecto visual de "cargando" en los datos viejos
 
         try {
-          const response = await fetch(SCRIPT_URL)
+          const response = await fetch(`${SCRIPT_URL}?tipo=gastos`)
           if (!response.ok)
             throw new Error('Error en la respuesta del servidor')
 
