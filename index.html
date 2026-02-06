@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GastoFlash PWA</title>
     <script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>
+    <link rel="manifest" href="manifest.json" />
     <style>
       body {
         font-family: sans-serif;
@@ -61,7 +62,8 @@
     </div>
 
     <script>
-      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
+      const SCRIPT_URL =
+        'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
 
       // Lógica de Escaneo
       document
@@ -103,5 +105,7 @@
         document.getElementById('monto').value = ''
       }
     </script>
+    if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js'); }
   </body>
 </html>
