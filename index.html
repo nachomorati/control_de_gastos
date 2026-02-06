@@ -104,8 +104,9 @@
         alert('¡Gasto guardado!')
         document.getElementById('monto').value = ''
       }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+      }
     </script>
-    if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js'); }
   </body>
 </html>
