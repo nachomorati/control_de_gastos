@@ -88,6 +88,14 @@
       <p id="status">Esperando ticket...</p>
     </div>
 
+    <div class="card">
+      <h3>📈 Gastos por Categoría</h3>
+      <button onclick="cargarInforme()" style="background: #007bff">
+        Actualizar Informe
+      </button>
+      <div id="lista-informe" style="margin-top: 15px"></div>
+    </div>
+
     <script>
       const SCRIPT_URL =
         'https://script.google.com/macros/s/AKfycbxYgkVqsEOt5PQkZk1fPgG4dZZSbRd2_PameAAZCxbQjXPQQUeWJOOdE5x5DbyLjzryvw/exec'
@@ -157,6 +165,35 @@
           btn.disabled = false
           btnText.innerText = 'Guardar en Sheet'
           loader.style.display = 'none'
+        }
+      }
+
+      async function cargarInforme() {
+        const contenedor = document.getElementById('lista-informe')
+        contenedor.innerHTML = 'Cargando datos... ⏳'
+
+        try {
+          // Fetch a la URL de tu script (el doGet)
+          const response = await fetch(SCRIPT_URL)
+          const datos = await response.json()
+
+          // Agrupar por categoría
+          const totales = datos.reduce((acc, gasto) => {
+            acc[gasto.categoria] = (acc[gasto.categoria] || 0) + gasto.monto
+            return acc
+          }, {})
+
+          // Crear tabla simple
+          let html =
+            '<table style="width:100%; text-align:left;"><tr><th>Categoría</th><th>Total</th></tr>'
+          for (const cat in totales) {
+            html += `<tr><td>${cat}</td><td>$${totales[cat].toFixed(2)}</td></tr>`
+          }
+          html += '</table>'
+
+          contenedor.innerHTML = html
+        } catch (error) {
+          contenedor.innerHTML = 'Error al cargar los datos. Verifica la URL.'
         }
       }
 
