@@ -62,6 +62,16 @@
         background-color: #94d3a2 !important;
         cursor: not-allowed;
       }
+
+      table {
+        font-size: 0.9rem;
+      }
+      th {
+        color: #666;
+        font-weight: normal;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+      }
     </style>
   </head>
   <body>
@@ -92,8 +102,13 @@
 
     <div class="card">
       <h3>📈 Gastos por Categoría</h3>
-      <button onclick="cargarInforme()" style="background: #007bff">
-        Actualizar Informe
+      <button
+        id="btn-informe"
+        onclick="cargarInforme()"
+        style="background: #007bff"
+      >
+        <span id="btn-text-informe">Actualizar Informe</span>
+        <div id="loader-informe" class="spinner" style="display: none"></div>
       </button>
       <div id="lista-informe" style="margin-top: 15px"></div>
     </div>
@@ -171,31 +186,53 @@
       }
 
       async function cargarInforme() {
+        const btn = document.getElementById('btn-informe')
+        const btnText = document.getElementById('btn-text-informe')
+        const loader = document.getElementById('loader-informe')
         const contenedor = document.getElementById('lista-informe')
-        contenedor.innerHTML = 'Cargando datos... ⏳'
+
+        // 1. Activar estado de carga
+        btn.disabled = true
+        btnText.innerText = 'Consultando Sheets...'
+        loader.style.display = 'inline-block'
+        contenedor.style.opacity = '0.5' // Efecto visual de "cargando" en los datos viejos
 
         try {
-          // Fetch a la URL de tu script (el doGet)
           const response = await fetch(SCRIPT_URL)
+          if (!response.ok)
+            throw new Error('Error en la respuesta del servidor')
+
           const datos = await response.json()
 
-          // Agrupar por categoría
+          // 2. Procesar datos (igual que antes)
           const totales = datos.reduce((acc, gasto) => {
             acc[gasto.categoria] = (acc[gasto.categoria] || 0) + gasto.monto
             return acc
           }, {})
 
-          // Crear tabla simple
-          let html =
-            '<table style="width:100%; text-align:left;"><tr><th>Categoría</th><th>Total</th></tr>'
+          let html = '<table style="width:100%; border-collapse: collapse;">'
+          html +=
+            '<tr style="border-bottom: 2px solid #ddd;"><th>Categoría</th><th style="text-align:right;">Total</th></tr>'
+
           for (const cat in totales) {
-            html += `<tr><td>${cat}</td><td>$${totales[cat].toFixed(2)}</td></tr>`
+            html += `<tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px 0;">${cat}</td>
+                        <td style="padding: 8px 0; text-align:right;"><strong>$${totales[cat].toLocaleString()}</strong></td>
+                     </tr>`
           }
           html += '</table>'
 
           contenedor.innerHTML = html
         } catch (error) {
-          contenedor.innerHTML = 'Error al cargar los datos. Verifica la URL.'
+          console.error(error)
+          contenedor.innerHTML =
+            "<p style='color:red;'>⚠️ No se pudo conectar con el presupuesto.</p>"
+        } finally {
+          // 3. Restaurar estado del botón
+          btn.disabled = false
+          btnText.innerText = 'Actualizar Informe'
+          loader.style.display = 'none'
+          contenedor.style.opacity = '1'
         }
       }
 
